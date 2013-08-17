@@ -16,6 +16,7 @@ import com.facebook.*;
 import com.facebook.model.*;
 
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -23,6 +24,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.Signature;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.TextToSpeech.EngineInfo;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -105,13 +107,17 @@ public class MainActivity extends FragmentActivity {
 						public void onCompleted(Response response) {
 							// TODO Auto-generated method stub
 							GraphObject home = response.getGraphObject();
-							Log.i("FB", response.toString());
+							//Log.i("FB", response.toString());
 							JSONArray feed = (JSONArray) home.getProperty("data");
-							Log.i("FB", feed.getClass().getCanonicalName());
+							//Log.i("FB", feed.getClass().getCanonicalName());
 							for (int i = 0; i < feed.length();i++){
 								try {
 									JSONObject post = (JSONObject) feed.get(i);
-									Log.i("Facebook Result", post.getJSONObject("from").getString("name") + ": " + post.getString("message").toString());
+									if(post.has("message")){
+										tts.speak(post.getJSONObject("from").getString("name") + ": " + post.getString("message").toString(),  TextToSpeech.QUEUE_ADD, null);
+										
+										Log.i("Facebook Result", post.getJSONObject("from").getString("name") + ": " + post.getString("message").toString());
+									}
 								} catch (JSONException e) {
 									// TODO Auto-generated catch block
 									e.printStackTrace();
@@ -141,7 +147,7 @@ public class MainActivity extends FragmentActivity {
         Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
     }
     
-    @Override
+    @SuppressLint("NewApi") @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -156,7 +162,10 @@ public class MainActivity extends FragmentActivity {
         mViewPager.setAdapter(mSectionsPagerAdapter);
         
         tts = new TextToSpeech(this, null);
-
+        List<EngineInfo> engines = tts.getEngines();
+        for(EngineInfo engine : engines){
+        	Log.i("fb", engine.toString());
+        }
     }
 
     @Override
