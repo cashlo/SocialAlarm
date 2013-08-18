@@ -114,8 +114,14 @@ public class MainActivity extends FragmentActivity {
 								try {
 									JSONObject post = (JSONObject) feed.get(i);
 									if(post.has("message")){
-										tts.speak(post.getJSONObject("from").getString("name") + ": " + post.getString("message").toString(),  TextToSpeech.QUEUE_ADD, null);
-										
+										String message = post.getString("message").toString();
+										message = message.replaceAll("\\(?\\b(http://|www[.])[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|]", "");
+										String englishMessage = message.replaceAll("[^a-zA-Z\\s]", "");
+										Log.i("fb", englishMessage + " " + englishMessage.length() + " " + message.length());
+										if(englishMessage.length()*2 > message.length()){
+											tts.speak(post.getJSONObject("from").getString("name") + " says " + message,  TextToSpeech.QUEUE_ADD, null);
+											tts.playSilence(1000, TextToSpeech.QUEUE_ADD, null);
+										}
 										Log.i("Facebook Result", post.getJSONObject("from").getString("name") + ": " + post.getString("message").toString());
 									}
 								} catch (JSONException e) {
